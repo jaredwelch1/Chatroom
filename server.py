@@ -9,10 +9,9 @@ def threaded_client_handler(conn):
 
 	while True:
 		data = conn.recv(2048)
-		reply = 'Server output: ' + data.decode('utf-8')
 		if not data:
 				break
-		conn.sendall(str.encode(reply))
+		print("received: " + data.decode('utf-8'))
 	conn.close()
 
 
@@ -22,7 +21,7 @@ class server(object):
 
 		try:
 			with open('users.json', 'r') as file:
-				users = json.load(file)
+				self.users = json.load(file)
 		except:
 			print('error opening user file')
 			exit()
