@@ -16,7 +16,7 @@ class ChatClient(object):
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.sock.connect((self.host, self.port))
-			print('Connected to chat esrver %s:%d' % (self.host, self.port))
+			print('Connected to chat server %s:%d' % (self.host, self.port))
 		except Exception as e:
 			print('Exception %s' % str(e))
 		while not self.flag:
@@ -32,6 +32,10 @@ class ChatClient(object):
 
 						if data:
 							self.sock.send(data.encode('utf-8'))
+					elif i == self.sock:
+						data = self.sock.recv(2048).decode('utf-8')
+						sys.stdout.write(data + '\n')
+						sys.stdout.flush()
 			except Exception as e:
 				print('Exception occurred:' + str(e))
 				close()
