@@ -19,9 +19,22 @@ class ChatClient(object):
 			print('Connected to chat esrver %s:%d' % (self.host, self.port))
 		except Exception as e:
 			print('Exception %s' % str(e))
-		while self.flag == False:
+		while not self.flag:
 			# do stuff
-			self.flag = False
+			try:
+				sys.stdout.write('')
+				sys.stdout.flush()
+				inputready, outputready, exceptrdy = select.select([0, self.sock], [], [])
+
+				for i in inputready:
+					if i == 0:
+						data = sys.stdin.readline().strip()
+
+						if data:
+							self.sock.send(data.encode('utf-8'))
+			except Exception as e:
+				print('Exception occurred:' + str(e))
+				close()
 		self.sock.connect.close()
 
 if __name__ == "__main__":
