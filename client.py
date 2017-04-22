@@ -38,8 +38,8 @@ class ChatClient(object):
 						sys.stdout.flush()
 			except Exception as e:
 				print('Exception occurred:' + str(e))
-				close()
-		self.sock.connect.close()
+				self.sock.close()
+		self.sock.close()
 
 if __name__ == "__main__":
 	if len(sys.argv) < 3:

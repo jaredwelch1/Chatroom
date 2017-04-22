@@ -4,7 +4,9 @@ from _thread import *
 import json
 
 
-def threaded_client_handler(conn):
+def threaded_client_handler(self, conn):
+	self.num_threads += 1
+	print(str(self.num_threads))
 	conn.send(str.encode('Welcome, these commands are available: '))
 
 	while True:
@@ -12,6 +14,8 @@ def threaded_client_handler(conn):
 		if not data:
 				break
 		print("received: " + data.decode('utf-8'))
+	self.num_threads -= 1
+	print(str(self.num_threads))
 	conn.close()
 
 
@@ -34,6 +38,10 @@ class server(object):
 			print(str(e))
 
 		s.listen(5)
+		
+		self.num_threads = 0
+		self.max_threads = 3
+
 		print('waitin for connection')
 
 
@@ -42,7 +50,7 @@ class server(object):
 
 			conn, addr = self.s.accept()
 			print('connected to client')
-			start_new_thread(threaded_client_handler,(conn,))
+			start_new_thread(threaded_client_handler,(self, conn))
 
 
 
