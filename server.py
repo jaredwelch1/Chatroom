@@ -3,17 +3,21 @@ import sys
 from _thread import *
 import json
 
+def threaded_exit_handler(self, conn):
+	conn.send(str.encode('close_client'))
+	
 
 def threaded_client_handler(self, conn):
 	self.num_threads += 1
 	print(str(self.num_threads))
-	conn.send(str.encode('Welcome, these commands are available: '))
+	conn.send(str.encode('Welcome, please log in using <login> <user> <pass>'))
+
 
 	while True:
-		data = conn.recv(2048)
+		data = conn.recv(2048).decode('utf-8')
 		if not data:
 				break
-		print("received: " + data.decode('utf-8'))
+		print(str(data))
 	self.num_threads -= 1
 	print(str(self.num_threads))
 	conn.close()
@@ -37,21 +41,34 @@ class server(object):
 		except socket.error as e:
 			print(str(e))
 
-		s.listen(5)
+		
 		
 		self.num_threads = 0
-		self.max_threads = 3
+		self.max_threads = 1
+		self.clients = []
+
+		s.listen(5)
 
 		print('waitin for connection')
 
 
 	def begin_server(self):
 		while True:
-
 			conn, addr = self.s.accept()
-			print('connected to client')
-			start_new_thread(threaded_client_handler,(self, conn))
+			
+			if self.max_threads > self.num_threads:
+				self.clients.append(conn)
+				print('connected to client' + str(conn))
+				start_new_thread(threaded_client_handler,(self, conn))
+			else:
+				start_new_thread(threaded_exit_handler, (self, conn))
 
+	def sendToAll(self, data, sourceClient):
+		for conn in self.clients:
+			if conn != sourceClient:
+				conn.send(data.encode('utf-8'))
+
+	
 
 
 if __name__ == "__main__":
