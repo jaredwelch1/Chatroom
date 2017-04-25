@@ -8,7 +8,7 @@ class connRefusedExcept(Exception):
 
 
 class ChatClient(object):
-	def __init__(self, host, port):
+	def __init__(self, host='127.0.0.1' , port=15109):
 		self.flag = False
 		self.port = int(port)
 		self.host = host
@@ -56,7 +56,9 @@ class ChatClient(object):
 		sys.exit()
 
 if __name__ == "__main__":
-	if len(sys.argv) < 3:
+	if len(sys.argv) < 3 and len(sys.argv) != 1:
 		sys.exit('Usage: %s listen_ip listen_port' % sys.argv[0])
-
-	ChatClient(sys.argv[1], sys.argv[2]).start()
+	if len(sys.argv) == 3:
+		ChatClient(sys.argv[1], sys.argv[2]).start()
+	else:
+		ChatClient().start()

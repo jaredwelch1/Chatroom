@@ -10,7 +10,7 @@ def threaded_exit_handler(self, conn):
 
 def threaded_client_handler(server, conn):
 	server.num_threads += 1
-	print(str(server.num_threads))
+	print('connected to client, count of total clients = ' + str(server.num_threads))
 	conn.send(str.encode('Welcome, please log in using <login> <user> <pass>'))
 
 
@@ -20,14 +20,14 @@ def threaded_client_handler(server, conn):
 				break
 
 		server.handleClientData(data, conn)
-	
 	server.num_threads -= 1
+	print('client disconnect, total number remaining: ' + str(server.num_threads))
 	conn.close()
 
 
 class server(object):
 
-	def __init__(self, host='127.0.0.1', port=5555):
+	def __init__(self, host='127.0.0.1', port=15109):
 
 		try:
 			with open('users.json', 'r') as file:
@@ -60,7 +60,6 @@ class server(object):
 			
 			if self.max_threads > self.num_threads:
 				self.clients.append(conn)
-				print('connected to client' + str(conn))
 				start_new_thread(threaded_client_handler,(self, conn))
 			else:
 				start_new_thread(threaded_exit_handler, (self, conn))
@@ -72,11 +71,11 @@ class server(object):
 
 	def handleClientData(self, data, client):
 		command = data.split(' ', 1)
-
+		print(str(self.clients))
 		if command[0] == 'help':
-			client.send(str('Commands: Login <username>\nsend').ecnode('utf-8'))
+			client.send(str('Commands: Login <username>\nsend').encode('utf-8'))
 		else:
-			print('The command you gave is unknown or formatted correctly. Type help to see commands')
+			client.send(str('The command you gave is unknown or formatted incorrectly. Type help to see commands').encode('utf-8'))
 	
 
 
