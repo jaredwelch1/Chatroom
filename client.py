@@ -30,7 +30,6 @@ class ChatClient(object):
 				inputready, outputready, exceptrdy = select.select([0, self.sock], [], [])
 
 				for i in inputready:
-					print(str(i))
 					if i == 0:
 						data = sys.stdin.readline().strip()
 
@@ -38,11 +37,11 @@ class ChatClient(object):
 							self.sock.send(data.encode('utf-8'))
 					elif i == self.sock:
 						data = self.sock.recv(2048).decode('utf-8')
-						if data == str('close_client'):
-							input('press enter to cont, received close')
+						
+						# if receives something like a conn closed 
+						if not data:
+							print('shutting down')
 							self.flag = True
-							raise connRefusedExcept('conn closed')
-
 						sys.stdout.write(data + '\n')
 						sys.stdout.flush()
 					else:
@@ -52,7 +51,7 @@ class ChatClient(object):
 				print(str(e))
 			except Exception as e:
 				print('Exception occurred:' + str(e)) 	
-				self.sock.close()
+				
 		self.sock.close()
 		sys.exit()
 

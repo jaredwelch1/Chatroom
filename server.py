@@ -4,12 +4,13 @@ from _thread import *
 import json
 
 def threaded_exit_handler(self, conn):
-	conn.send(str.encode('close_client'))
+	#conn.send(str.encode('close_client'))
+	conn.close()
 	
 
-def threaded_client_handler(self, conn):
-	self.num_threads += 1
-	print(str(self.num_threads))
+def threaded_client_handler(server, conn):
+	server.num_threads += 1
+	print(str(server.num_threads))
 	conn.send(str.encode('Welcome, please log in using <login> <user> <pass>'))
 
 
@@ -17,9 +18,10 @@ def threaded_client_handler(self, conn):
 		data = conn.recv(2048).decode('utf-8')
 		if not data:
 				break
-		print(str(data))
-	self.num_threads -= 1
-	print(str(self.num_threads))
+
+		server.handleClientData(data, conn)
+	
+	server.num_threads -= 1
 	conn.close()
 
 
@@ -68,6 +70,13 @@ class server(object):
 			if conn != sourceClient:
 				conn.send(data.encode('utf-8'))
 
+	def handleClientData(self, data, client):
+		command = data.split(' ', 1)
+
+		if command[0] == 'help':
+			client.send(str('Commands: Login <username>\nsend').ecnode('utf-8'))
+		else:
+			print('The command you gave is unknown or formatted correctly. Type help to see commands')
 	
 
 
