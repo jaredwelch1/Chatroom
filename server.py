@@ -15,6 +15,8 @@ def threaded_client_handler(server, conn):
 
 
 	while True:
+		# after talking about it, a fix that should be added is checking for length of message 
+		# and ensuring the whole message is received before trying to do anything with that message
 		data = conn.recv(2048).decode('utf-8')
 		if not data:
 				break
