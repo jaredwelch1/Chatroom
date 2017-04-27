@@ -17,7 +17,11 @@ def threaded_client_handler(server, conn):
 	while True:
 		# after talking about it, a fix that should be added is checking for length of message 
 		# and ensuring the whole message is received before trying to do anything with that message
-		data = conn.recv(2048).decode('utf-8')
+		try:
+			data = conn.recv(2048).decode('utf-8')
+		except Exception as e:
+			break
+			
 		if not data:
 				break
 
@@ -81,6 +85,16 @@ class server(object):
 			if conn != sourceClient:
 				conn.send(data.encode('utf-8'))
 
+	def logout(self, client):
+		for item in self.client_user_list:
+			if item[0] == client:
+				user = item[1]
+				self.client_user_list.remove(item)
+			
+		self.loggedInClients.remove(client)
+		self.sendToAll(str(user + " logged out."), client)
+		client.close()
+
 	def handleClientData(self, data, client):
 		command = data.split(' ', 1)
 
@@ -88,9 +102,17 @@ class server(object):
 			client.send(str('Commands: Login <username>\nsend').encode('utf-8'))
 		elif command[0] == 'login':
 			if len(command) == 2:
-				username, password = command[1].split(' ', 1)
+				if len(command[1].split(' ', 1)) > 1:
+					username, password = command[1].split(' ', 1)
+				else:
+					username, password = '',''
+					client.send(str('Login requires password').encode('utf-8'))
+				
+				foundUsername = False
 				for user in self.users:
+
 					if username.lower() == user['username'].lower():
+						foundUsername = True
 						if password == user['password']:
 							for conn in self.clients:
 								if conn == client:
@@ -102,12 +124,16 @@ class server(object):
 									'''
 
 									self.loggedInClients.append(conn)
-									self.client_user_list.append([conn, username])
+									self.client_user_list.append([conn, username.lower()])
 									
 									client.send(str('Welcome ' + user['username']).encode('utf-8'))
 									self.sendToAll(str(user['username'] + ' joined the room'), client)
 						else:
 							client.send(str('login incorrect').encode('utf-8'))
+				if not foundUsername:
+					client.send(str('login incorrect').encode('utf-8'))
+			else:
+				client.send(str('Login command missing required args').encode('utf-8'))		
 		elif client in self.loggedInClients:
 			if command[0] == 'send':
 				if len(command) > 1:
@@ -119,13 +145,31 @@ class server(object):
 							if client == item[0]:
 								user = item[1]
 
-								self.sendToAll(str(user + '>> ' + msg), client)
+								self.sendToAll(str(str(user) + '>> ' + str(msg)), client)
 					else:
+						found = False
+
 						for item in self.client_user_list:
+							print(str(item))
 							if recipient.lower() == item[1]:
 								item[0].send(str(item[1] + "(direct message)>> " + msg).encode('utf-8'))
-							else:
-								client.send(str('The user requested for messaging is not logged in or does not exist').ecnode('utf-8'))
+								found = True
+							
+						if not found:
+							client.send(str('The user requested for messaging is not logged in or does not exist').encode('utf-8'))
+			elif command[0] == 'who':
+				users_string = 'Logged in users: '
+
+				if len(self.client_user_list) > 1:
+					for item in self.client_user_list:
+						if item[0] != client:
+							users_string += str(item[1] + ', ')
+					client.send(users_string.encode('utf-8'))
+				else:
+					client.send(str('You are the only user currently logged in').encode('utf-8'))
+			elif command[0] == 'logout':
+				self.logout(client)
+
 
 			# if send UserID
 			''' send message to server, let server send to userID matched by name '''
@@ -134,7 +178,7 @@ class server(object):
 
 			# logout
 			''' close connection and leave. others notified of leaving '''
-
+			
 		else:
 			client.send(str('You must login before you may access this chat service').encode('utf-8'))
 	
