@@ -1,6 +1,18 @@
 [
   {
-    "username": "testName",
-    "password": "testPass"
+    "username": "Tom",
+    "password": "Tom11"
+  },
+  {
+    "username": "David",
+    "password": "David22"
+  },
+  {
+    "username": "Beth",
+    "password": "Beth33"
+  },
+  {
+    "username": "John",
+    "password": "John44"
   }
 ]
