@@ -4,7 +4,7 @@ from _thread import *
 import json
 
 def threaded_exit_handler(self, conn):
-	#conn.send(str.encode('close_client'))
+	conn.send(str.encode('chat room is full'))
 	conn.close()
 	
 
@@ -148,13 +148,16 @@ class server(object):
 								self.sendToAll(str(str(user) + '>> ' + str(msg)), client)
 					else:
 						found = False
-
+						senderName = ''
 						for item in self.client_user_list:
-							print(str(item))
+							if client == item[0]:
+								senderName = str(item[1]) 
+						for item in self.client_user_list:
+
 							if recipient.lower() == item[1]:
-								item[0].send(str(item[1] + "(direct message)>> " + msg).encode('utf-8'))
+								item[0].send(str("from " + senderName + "(direct message)>> " + msg).encode('utf-8'))
 								found = True
-							
+
 						if not found:
 							client.send(str('The user requested for messaging is not logged in or does not exist').encode('utf-8'))
 			elif command[0] == 'who':
