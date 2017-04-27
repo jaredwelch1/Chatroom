@@ -24,6 +24,10 @@ def threaded_client_handler(server, conn):
 		server.handleClientData(data, conn)
 	server.num_threads -= 1
 	print('client disconnect, total number remaining: ' + str(server.num_threads))
+	
+	for c in server.clients:
+		if c == conn:
+			server.clients.remove(c)
 	conn.close()
 
 
@@ -48,8 +52,14 @@ class server(object):
 		
 		
 		self.num_threads = 0
-		self.max_threads = 1
+
+		# allow max_threads to be easy to change
+		self.max_threads = 3
+		
+		# list of clients connected
 		self.clients = []
+		self.loggedInClients = []
+		self.client_user_list = []
 
 		s.listen(5)
 
@@ -73,11 +83,60 @@ class server(object):
 
 	def handleClientData(self, data, client):
 		command = data.split(' ', 1)
-		print(str(self.clients))
+
 		if command[0] == 'help':
 			client.send(str('Commands: Login <username>\nsend').encode('utf-8'))
+		elif command[0] == 'login':
+			if len(command) == 2:
+				username, password = command[1].split(' ', 1)
+				for user in self.users:
+					if username.lower() == user['username'].lower():
+						if password == user['password']:
+							for conn in self.clients:
+								if conn == client:
+									
+									''' 
+										if I was going to be truly OO design conscious, I would make a class for this list so that I could
+										build out logging in and all that, but honestly this stuff should be persisted in a database
+										anyway so whatever
+									'''
+
+									self.loggedInClients.append(conn)
+									self.client_user_list.append([conn, username])
+									
+									client.send(str('Welcome ' + user['username']).encode('utf-8'))
+									self.sendToAll(str(user['username'] + ' joined the room'), client)
+						else:
+							client.send(str('login incorrect').encode('utf-8'))
+		elif client in self.loggedInClients:
+			if command[0] == 'send':
+				if len(command) > 1:
+					recipient, msg = command[1].split(' ', 1)
+					
+					if recipient.lower() == 'all':
+
+						for item in self.client_user_list:
+							if client == item[0]:
+								user = item[1]
+
+								self.sendToAll(str(user + '>> ' + msg), client)
+					else:
+						for item in self.client_user_list:
+							if recipient.lower() == item[1]:
+								item[0].send(str(item[1] + "(direct message)>> " + msg).encode('utf-8'))
+							else:
+								client.send(str('The user requested for messaging is not logged in or does not exist').ecnode('utf-8'))
+
+			# if send UserID
+			''' send message to server, let server send to userID matched by name '''
+			# who 
+			''' list who is in the room '''
+
+			# logout
+			''' close connection and leave. others notified of leaving '''
+
 		else:
-			client.send(str('The command you gave is unknown or formatted incorrectly. Type help to see commands').encode('utf-8'))
+			client.send(str('You must login before you may access this chat service').encode('utf-8'))
 	
 
 
