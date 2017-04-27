@@ -5,18 +5,18 @@ The client can use the following commands:
 
 - login
 
-    usage: login <user> <pass>
+    usage: login user pass
     
     If a valid username and password are supplied, the client is logged in to the server under that account. All remaining commands require logging in before they are accessible to the client.
     Upon logging in, all other currently connected and logged in clients see the new user has logged in.
 
 - send
 
-    usage: send <target> <message>
+    usage: send target message
     
-    If <target> is a valid Username, the message is sent to the server, and then directly to that user by the server.
+    If target is a valid Username, the message is sent to the server, and then directly to that user by the server.
     
-    If <taget> is 'all', the message is sent to the server and broadcasted to all users by the server.
+    If target is 'all', the message is sent to the server and broadcasted to all users by the server.
 
 - Who
 
