@@ -29,3 +29,9 @@ The client can use the following commands:
     usage: logout
 
     Logs the current user out, disconnects the client connection to the server, and server broadcasts that the user has left to others.
+    
+## To Do
+
+- Refactor code and create functions to handle each command instead of coding it all out inside handle data
+- Put check in place on server and client to receive the number of bytes to read so that it knows exactly 
+  how much data to expect
