@@ -95,12 +95,13 @@ class server(object):
 		self.sendToAll(str(user + " logged out."), client)
 		client.close()
 	
-	def addUser(self, username, password):
+	def addUser(self, username, password, client):
 		self.users.append({"username":username, "password":"password"})
 		# str({"password":password, "username":username}))
 		with open('users.json', 'w') as file:	
 			json.dump(self.users, file)
 		print(str('New user ' + username + ' added'))
+		client.send(str('New user ' + username + ' added').encode('utf-8'))
 	def handleClientData(self, data, client):
 		command = data.split(' ', 1)
 
@@ -181,7 +182,7 @@ class server(object):
 					if len(command[1].split(' ', 1)) > 1:
 						username, password = command[1].split(' ', 1)
 						if username and password:
-							self.addUser(username, password)
+							self.addUser(username, password, client)
 			elif command[0] == 'logout':
 				self.logout(client)
 
