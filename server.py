@@ -94,7 +94,13 @@ class server(object):
 		self.loggedInClients.remove(client)
 		self.sendToAll(str(user + " logged out."), client)
 		client.close()
-
+	
+	def addUser(self, username, password):
+		self.users.append({"username":username, "password":"password"})
+		# str({"password":password, "username":username}))
+		with open('users.json', 'w') as file:	
+			json.dump(self.users, file)
+		print(str('New user ' + username + ' added'))
 	def handleClientData(self, data, client):
 		command = data.split(' ', 1)
 
@@ -170,6 +176,12 @@ class server(object):
 					client.send(users_string.encode('utf-8'))
 				else:
 					client.send(str('You are the only user currently logged in').encode('utf-8'))
+			elif command[0] == 'newUser':
+				if len(command) == 2:
+					if len(command[1].split(' ', 1)) > 1:
+						username, password = command[1].split(' ', 1)
+						if username and password:
+							self.addUser(username, password)
 			elif command[0] == 'logout':
 				self.logout(client)
 
