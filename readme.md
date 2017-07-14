@@ -30,6 +30,12 @@ The client can use the following commands:
 
     Logs the current user out, disconnects the client connection to the server, and server broadcasts that the user has left to others.
     
+- newUser 
+
+    usage: newUser <username> <password>
+
+    creates a new user with username and password 
+    
 ## To Do
 
 - Refactor code and create functions to handle each command instead of coding it all out inside handle data
